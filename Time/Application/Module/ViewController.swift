@@ -15,7 +15,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBOutlet weak var checkButton: UIButton!
     @IBOutlet weak var table: UITableView!
     
-    var dataArray = Array<String>()
+//    var dataArray = Array<String>()
+    private var viewModel: ViewModel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,7 +25,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         self.table.dataSource = self
         
         if let data = UserDefaults().object(forKey: "RESULT") {
-            dataArray = data as! [String]
+            let tempDataArray = data as! [String]
+            viewModel = ViewModel(dataArray: tempDataArray)
         }
     }
     
@@ -36,19 +38,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         if let inputTime = Int(inputTextField.text!), let startTime = Int(startTimeTextField.text!),  let endTime = Int(endTimeTextField.text!) {
             
-            let result = Function().isInTimeRange(inputTime: inputTime, startTime: startTime, endTime: endTime)
+            let result = viewModel.isInTimeRange(inputTime: inputTime, startTime: startTime, endTime: endTime)
             let saveString = "開始時刻: \(startTime) 終了時刻: \(endTime) ある時刻: \(inputTime) 判断結果: \(result)"
             
             print("開始時刻: \(startTime) 終了時刻: \(endTime) ある時刻: \(inputTime) 判断結果: \(result)")
             
             if let data = UserDefaults().object(forKey: "RESULT") {
-                dataArray = data as! [String]
-                dataArray.append(saveString)
-                UserDefaults().set(dataArray, forKey: "RESULT")
+                viewModel.dataArray = data as! [String]
+                viewModel.dataArray.append(saveString)
+                UserDefaults().set(viewModel.dataArray, forKey: "RESULT")
                 table.reloadData()
             } else {
-                dataArray.append(saveString)
-                UserDefaults().set(dataArray, forKey: "RESULT")
+                viewModel.dataArray.append(saveString)
+                UserDefaults().set(viewModel.dataArray, forKey: "RESULT")
                 table.reloadData()
             }
             
@@ -60,7 +62,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
 extension ViewController {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataArray.count
+        return viewModel.dataArray.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -69,7 +71,7 @@ extension ViewController {
         cell.selectionStyle = .none
         
         var cc = cell.defaultContentConfiguration()
-        cc.text = dataArray[indexPath.row]
+        cc.text = viewModel.dataArray[indexPath.row]
         cell.contentConfiguration = cc
         
         return cell
